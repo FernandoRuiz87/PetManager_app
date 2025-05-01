@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/pages/register_page.dart';
 
 // Header para el login y la pagina de registro
 class Header extends StatelessWidget {
@@ -55,45 +54,7 @@ class Header extends StatelessWidget {
   }
 }
 
-class CustomButton extends StatelessWidget {
-  const CustomButton({
-    super.key,
-    required this.buttonColor,
-    required this.text,
-    required this.foregroundColor,
-    required this.route,
-  });
-
-  final Color buttonColor;
-  final String text;
-  final Color foregroundColor;
-  final String route;
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () {
-        if (route == 'back') {
-          Navigator.pop(context); // Regresa a la pantalla anterior
-        } else if (route == 'register_page') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const RegisterPage()),
-          );
-        }
-      },
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-        textStyle: const TextStyle(fontSize: 18),
-        backgroundColor: buttonColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        side: BorderSide(color: buttonColor),
-      ),
-      child: Text(text, style: TextStyle(fontSize: 16, color: foregroundColor)),
-    );
-  }
-}
-
+//Divisor para botones
 class SectionDivider extends StatelessWidget {
   const SectionDivider({super.key});
 
@@ -101,7 +62,9 @@ class SectionDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Row(
       children: [
-        Expanded(child: Divider(color: AppColors.textTertiary, thickness: 1)),
+        Expanded(
+          child: Divider(color: AppColors.textFieldBorderColor, thickness: 1.5),
+        ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: Text(
@@ -109,7 +72,9 @@ class SectionDivider extends StatelessWidget {
             style: TextStyle(color: AppColors.textTertiary),
           ),
         ),
-        Expanded(child: Divider(color: AppColors.textTertiary, thickness: 1)),
+        Expanded(
+          child: Divider(color: AppColors.textFieldBorderColor, thickness: 1.5),
+        ),
       ],
     );
   }

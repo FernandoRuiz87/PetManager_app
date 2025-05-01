@@ -9,4 +9,7 @@ class AppColors {
   static const Color textTertiary = Color(0xFF6C757D);
   static const Color alert = Color(0xFFFF6B6B);
   static const Color textFieldBorderColor = Color(0xFFCED4DA);
+  static const Color photoStroke = Color(0xFFDDDDDD);
+  static const Color cardStroke = Color(0xFFEEEEEE);
+  static const Color cardBackground = Color(0xFFFFFFFF);
 }

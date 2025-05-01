@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
+import 'package:pet_manager_app/pages/home_page.dart';
 import 'package:pet_manager_app/pages/login_page.dart';
+import 'package:pet_manager_app/pages/pet_page.dart';
 import 'package:pet_manager_app/pages/register_page.dart';
 
 void main() {
@@ -13,15 +15,20 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: 'login_page',
+      initialRoute: '/pet',
       routes: {
-        'login_page': (context) => const LoginPage(),
-        'register_page': (context) => const RegisterPage(),
+        '/login': (context) => const LoginPage(),
+        '/register': (context) => const RegisterPage(),
+        '/home': (context) => const HomePage(),
+        '/pet': (context) => const PetPage(),
       },
       theme: ThemeData.light().copyWith(
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          centerTitle: true,
+          titleTextStyle: TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+          toolbarHeight: 70,
         ),
         textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Inter'),
       ),

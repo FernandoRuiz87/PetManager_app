@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
 import 'package:pet_manager_app/widgets/common_widgets.dart';
+import 'package:pet_manager_app/widgets/custom_buttons.dart';
 import 'package:pet_manager_app/widgets/custom_text_fields.dart';
 
 class LoginPage extends StatefulWidget {
@@ -37,20 +38,24 @@ class _LoginPageState extends State<LoginPage> {
                 const _ForgetPasswordButton(),
                 const SizedBox(height: 20),
                 // Boton de iniciar sesion
-                const CustomButton(
+                CustomButton(
                   text: 'Iniciar sesión',
                   buttonColor: AppColors.primary,
                   foregroundColor: AppColors.textSecondary,
-                  route: '',
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, '/home');
+                  },
                 ),
                 const SizedBox(height: 26),
                 const SectionDivider(),
                 const SizedBox(height: 26),
-                const CustomButton(
+                CustomButton(
                   text: 'Crear cuenta',
                   buttonColor: AppColors.secondary,
                   foregroundColor: AppColors.textPrimary,
-                  route: 'register_page',
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
                 ),
               ],
             ),
@@ -76,6 +81,8 @@ class _ForgetPasswordButton extends StatelessWidget {
             fontSize: 15,
             color: AppColors.primary,
             decoration: TextDecoration.underline,
+            decorationColor: AppColors.primary,
+            decorationThickness: 0.5,
           ),
         ),
       ),

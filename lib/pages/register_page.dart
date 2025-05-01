@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
 import 'package:pet_manager_app/widgets/common_widgets.dart';
+import 'package:pet_manager_app/widgets/custom_buttons.dart';
 import 'package:pet_manager_app/widgets/custom_text_fields.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -48,20 +49,32 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(height: 10),
               const _UserAgreementCheckbox(),
               const SizedBox(height: 20),
-              const CustomButton(
+              CustomButton(
                 buttonColor: AppColors.primary,
                 text: 'Crear cuenta',
                 foregroundColor: AppColors.textSecondary,
-                route: '',
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/home',
+                    (route) => false, // Elimina todas las rutas anteriores
+                  );
+                },
               ),
               const SizedBox(height: 26),
               const SectionDivider(),
               const SizedBox(height: 26),
-              const CustomButton(
+              CustomButton(
                 text: 'Iniciar sesión',
                 buttonColor: AppColors.secondary,
                 foregroundColor: AppColors.textPrimary,
-                route: 'back',
+                onPressed: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/login',
+                    (route) => false, // Elimina todas las rutas anteriores
+                  );
+                },
               ),
             ],
           ),
