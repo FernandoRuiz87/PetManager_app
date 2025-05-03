@@ -12,4 +12,6 @@ class AppColors {
   static const Color photoStroke = Color(0xFFDDDDDD);
   static const Color cardStroke = Color(0xFFEEEEEE);
   static const Color cardBackground = Color(0xFFFFFFFF);
+  static const Color good = Color(0xFF95BF8F);
+  static const Color warning = Color(0xFFFFE66D);
 }
