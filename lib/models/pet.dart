@@ -1,7 +1,9 @@
 import 'package:pet_manager_app/models/shower.dart';
 import 'package:pet_manager_app/models/vaccine.dart';
+import 'package:uuid/uuid.dart';
 
 class Pet {
+  final String id;
   final String name;
   final String specie;
   final String? breed; // raza
@@ -11,6 +13,7 @@ class Pet {
   final List<Shower>? showers;
 
   Pet({
+    String? id,
     required this.name,
     required this.specie,
     this.breed,
@@ -18,10 +21,11 @@ class Pet {
     this.photoUrl,
     this.vaccines,
     this.showers,
-  });
+  }) : id = id ?? const Uuid().v4(); // Genera ID si no se proporciona ;
 
   factory Pet.fromJson(Map<String, dynamic> json) {
     return Pet(
+      id: json['id'] as String? ?? const Uuid().v4(),
       name: json['name'] as String,
       specie: json['specie'] as String,
       breed: json['breed'] as String?,
@@ -40,6 +44,7 @@ class Pet {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'name': name,
       'specie': specie,
       'breed': breed,

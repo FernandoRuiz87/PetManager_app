@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
 
 // Card para baños
 class ShowerCard extends StatelessWidget {
@@ -30,8 +29,17 @@ class _CardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [_ShowerInfo(), SizedBox(width: 10), _ActionButtons()],
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _ShowerInfo(),
+        const SizedBox(width: 40),
+        IconButton(
+          icon: Icon(Icons.delete, color: AppColors.alert),
+          onPressed: () {
+            // Acción al presionar el botón
+          },
+        ),
+      ],
     );
   }
 }
@@ -71,31 +79,6 @@ class _InfoText extends StatelessWidget {
         fontWeight: isTitle ? FontWeight.w600 : FontWeight.normal,
         color: color,
       ),
-    );
-  }
-}
-
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        CustomTextButton(
-          text: 'Editar',
-          onPressed: () {},
-          textColor: AppColors.primary,
-          fontSize: 16,
-        ),
-        CustomTextButton(
-          text: 'Eliminar',
-          onPressed: () {},
-          textColor: AppColors.alert,
-          fontSize: 16,
-        ),
-      ],
     );
   }
 }

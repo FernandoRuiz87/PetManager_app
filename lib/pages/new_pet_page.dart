@@ -1,8 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:pet_manager_app/widgets/shared_pet_form.dart';
 import 'package:provider/provider.dart';
 
 import 'package:pet_manager_app/colors/app_colors.dart';
@@ -107,7 +105,7 @@ class _NewPetPageState extends State<NewPetPage> {
                     validator: _requiredValidator,
                   ),
                   const SizedBox(height: 20),
-                  _SpeciesDropdown(
+                  SpeciesDropdown(
                     onChanged: (value) {
                       setState(() => _selectedSpecies = value);
                     },
@@ -129,7 +127,7 @@ class _NewPetPageState extends State<NewPetPage> {
                     controller: _breedController,
                   ),
                   const SizedBox(height: 20),
-                  _PhotoSection(
+                  PetPhotoSection(
                     onImageSelected: (image) {
                       setState(() => _petImage = image);
                     },
@@ -161,160 +159,5 @@ class _NewPetPageState extends State<NewPetPage> {
     if (int.tryParse(value) == null)
       return 'Por favor ingresa un número válido';
     return null;
-  }
-}
-
-Future<String> saveImagePermanently(XFile image) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final name = p.basename(image.path);
-  final imagePath = p.join(directory.path, name);
-  final newImage = await File(image.path).copy(imagePath);
-  return newImage.path;
-}
-
-class _PhotoSection extends StatefulWidget {
-  final ValueChanged<XFile?> onImageSelected;
-  const _PhotoSection({required this.onImageSelected});
-
-  @override
-  State<_PhotoSection> createState() => _PhotoSectionState();
-}
-
-class _PhotoSectionState extends State<_PhotoSection> {
-  XFile? _imageFile;
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      final savedPath = await saveImagePermanently(image);
-      final savedImage = XFile(savedPath);
-      setState(() => _imageFile = savedImage);
-      widget.onImageSelected(savedImage);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text(
-          'Selecciona la foto de tu mascota',
-          style: TextStyle(fontSize: 18),
-        ),
-        const SizedBox(height: 5),
-        GestureDetector(
-          onTap: _pickImage,
-          child:
-              _imageFile == null
-                  ? const _EmptyImagePlaceholder()
-                  : _ImagePreview(imageFile: _imageFile!),
-        ),
-      ],
-    );
-  }
-}
-
-class _ImagePreview extends StatelessWidget {
-  final XFile imageFile;
-  const _ImagePreview({required this.imageFile});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      width: 200,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.background),
-        image: DecorationImage(
-          image: FileImage(File(imageFile.path)),
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
-  }
-}
-
-class _EmptyImagePlaceholder extends StatelessWidget {
-  const _EmptyImagePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      width: 200,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: AppColors.textFieldBorderColor),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(
-            Icons.photo_outlined,
-            size: 100,
-            color: AppColors.textFieldBorderColor,
-          ),
-          SizedBox(height: 10),
-          Text(
-            'Toca para agregar una foto',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textTertiary, fontSize: 20),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SpeciesDropdown extends StatelessWidget {
-  final ValueChanged<String?> onChanged;
-  const _SpeciesDropdown({required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Text('Selecciona la especie', style: TextStyle(fontSize: 18)),
-        const SizedBox(height: 5),
-        DropdownButtonFormField<String>(
-          hint: const Text('Selecciona una opción'),
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            filled: true,
-            fillColor: Colors.white,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.textFieldBorderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.alert),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.alert, width: 2),
-            ),
-          ),
-          style: const TextStyle(color: Colors.black, fontSize: 16),
-          dropdownColor: Colors.white,
-          validator:
-              (value) => value == null ? 'Este campo es obligatorio' : null,
-          items: const [
-            DropdownMenuItem(value: 'Perro', child: Text('Perro')),
-            DropdownMenuItem(value: 'Gato', child: Text('Gato')),
-            DropdownMenuItem(value: 'Ave', child: Text('Ave')),
-            DropdownMenuItem(value: 'Pez', child: Text('Pez')),
-            DropdownMenuItem(value: 'Reptil', child: Text('Reptil')),
-            DropdownMenuItem(value: 'Otro', child: Text('Otro')),
-          ],
-          onChanged: onChanged,
-        ),
-      ],
-    );
   }
 }

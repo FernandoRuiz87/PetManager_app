@@ -32,7 +32,6 @@ class MainApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/pet': (context) => const PetPage(),
         '/newPet': (context) => const NewPetPage(),
-        // '/updatePet': (context) => const EditPetPage(), //
         '/newVaccine': (context) => const NewVaccinePage(),
         '/updateVaccine': (context) => const EditVaccinePage(), //
       },
