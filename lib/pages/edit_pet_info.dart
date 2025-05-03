@@ -1,30 +1,66 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
-
+import 'package:pet_manager_app/providers/pet_provider.dart';
+import 'package:pet_manager_app/widgets/custom_text_fields.dart';
+import 'package:pet_manager_app/widgets/custom_buttons.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
 import 'package:pet_manager_app/models/pet.dart';
-import 'package:pet_manager_app/providers/pet_provider.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/custom_text_fields.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class NewPetPage extends StatefulWidget {
-  const NewPetPage({super.key});
+class EditPetPage extends StatefulWidget {
+  final Pet pet;
+
+  const EditPetPage({super.key, required this.pet});
 
   @override
-  State<NewPetPage> createState() => _NewPetPageState();
+  State<EditPetPage> createState() => _EditPetPageState();
 }
 
-class _NewPetPageState extends State<NewPetPage> {
+class _EditPetPageState extends State<EditPetPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _breedController = TextEditingController();
-  final _ageController = TextEditingController();
-  XFile? _petImage;
+  late TextEditingController _nameController;
+  late TextEditingController _breedController;
+  late TextEditingController _ageController;
   String? _selectedSpecies;
+  XFile? _petImage;
+
+  bool _hasChanged = false; // Estado para detectar cambios
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.pet.name);
+    _breedController = TextEditingController(text: widget.pet.breed);
+    _ageController = TextEditingController(text: widget.pet.age.toString());
+    _selectedSpecies = widget.pet.specie;
+    _petImage =
+        widget.pet.photoUrl != null && widget.pet.photoUrl!.isNotEmpty
+            ? XFile(widget.pet.photoUrl!)
+            : null;
+    // Agregar listeners para detectar cambios en los campos
+    _nameController.addListener(_checkChanges);
+    _breedController.addListener(_checkChanges);
+    _ageController.addListener(_checkChanges);
+  }
+
+  void _checkChanges() {
+    final hasNewChanges =
+        _nameController.text != widget.pet.name ||
+        _breedController.text != widget.pet.breed ||
+        _ageController.text != widget.pet.age.toString() ||
+        _selectedSpecies != widget.pet.specie ||
+        (_petImage?.path ?? '') != (widget.pet.photoUrl ?? '');
+
+    if (hasNewChanges != _hasChanged) {
+      setState(() {
+        _hasChanged = hasNewChanges;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -34,62 +70,50 @@ class _NewPetPageState extends State<NewPetPage> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _saveChanges() async {
+    // Crear la mascota actualizada
+    final updatedPet = Pet(
+      name: _nameController.text,
+      specie: _selectedSpecies!,
+      age: int.parse(_ageController.text),
+      breed: _breedController.text,
+      photoUrl: _petImage?.path ?? widget.pet.photoUrl,
+    );
+
+    final petProvider = Provider.of<PetProvider>(context, listen: false);
+    await petProvider.updatePet(updatedPet);
+
+    Navigator.pop(context, '/home');
+  }
+
+  void _submitEdit() {
     if (_formKey.currentState!.validate()) {
-      _savePet();
-      Navigator.pop(context, '/home');
+      _saveChanges();
+      Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text(
+        const SnackBar(
+          content: Text(
             'Por favor completa todos los campos correctamente.',
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: AppColors.alert,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
-          margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 3),
+          margin: EdgeInsets.all(16),
+          duration: Duration(seconds: 3),
         ),
       );
     }
   }
 
-  Future<void> _savePet() async {
-    final newPet = Pet(
-      name: _nameController.text,
-      specie: _selectedSpecies!,
-      age: int.parse(_ageController.text),
-      breed: _breedController.text,
-      photoUrl: _petImage?.path ?? '',
-    );
-
-    final petProvider = Provider.of<PetProvider>(context, listen: false);
-    await petProvider.addPet(newPet);
-
-    _nameController.clear();
-    _breedController.clear();
-    _ageController.clear();
-    setState(() {
-      _petImage = null;
-      _selectedSpecies = null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.of(context).padding;
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Nueva mascota')),
-      body: Padding(
-        padding: EdgeInsets.only(
-          left: padding.left,
-          right: padding.right,
-          bottom: padding.bottom,
-        ),
+      appBar: AppBar(title: const Text('Editar mascota')),
+      body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -99,47 +123,68 @@ class _NewPetPageState extends State<NewPetPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   CustomTextField(
-                    fieldLabel: 'Ingresa el nombre de tu mascota',
-                    defaultText: 'Nombre de la mascota',
+                    fieldLabel: 'Nombre de la mascota',
+                    defaultText: '',
                     isNumberField: false,
                     controller: _nameController,
                     isRequired: true,
-                    validator: _requiredValidator,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Este campo es obligatorio';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
                   _SpeciesDropdown(
+                    initialValue: _selectedSpecies,
                     onChanged: (value) {
-                      setState(() => _selectedSpecies = value);
+                      setState(() {
+                        _selectedSpecies = value;
+                      });
+                      _checkChanges();
                     },
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    fieldLabel: 'Ingresa la edad de tu mascota',
-                    defaultText: 'Edad',
+                    fieldLabel: 'Edad',
+                    defaultText: '',
                     isNumberField: true,
                     controller: _ageController,
                     isRequired: true,
-                    validator: _ageValidator,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Este campo es obligatorio';
+                      }
+                      if (int.tryParse(value) == null) {
+                        return 'Por favor ingresa un número válido';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 20),
                   CustomTextField(
-                    fieldLabel: 'Ingresa la raza de tu mascota',
-                    defaultText: 'Raza',
+                    fieldLabel: 'Raza',
+                    defaultText: '',
                     isNumberField: false,
                     controller: _breedController,
                   ),
                   const SizedBox(height: 20),
                   _PhotoSection(
+                    initialImage: _petImage,
                     onImageSelected: (image) {
-                      setState(() => _petImage = image);
+                      setState(() {
+                        _petImage = image;
+                      });
+                      _checkChanges();
                     },
                   ),
                   const SizedBox(height: 20),
                   CustomButton(
-                    text: 'Agregar mascota',
-                    buttonColor: AppColors.primary,
+                    text: 'Guardar cambios',
+                    buttonColor: _hasChanged ? AppColors.primary : Colors.grey,
                     foregroundColor: AppColors.textSecondary,
-                    onPressed: _submitForm,
+                    onPressed: _hasChanged ? _submitEdit : () {},
                     height: 50,
                   ),
                 ],
@@ -150,20 +195,9 @@ class _NewPetPageState extends State<NewPetPage> {
       ),
     );
   }
-
-  String? _requiredValidator(String? value) {
-    if (value == null || value.isEmpty) return 'Este campo es obligatorio';
-    return null;
-  }
-
-  String? _ageValidator(String? value) {
-    if (value == null || value.isEmpty) return 'Este campo es obligatorio';
-    if (int.tryParse(value) == null)
-      return 'Por favor ingresa un número válido';
-    return null;
-  }
 }
 
+// Función para guardar la imagen de forma permanente
 Future<String> saveImagePermanently(XFile image) async {
   final directory = await getApplicationDocumentsDirectory();
   final name = p.basename(image.path);
@@ -173,23 +207,36 @@ Future<String> saveImagePermanently(XFile image) async {
 }
 
 class _PhotoSection extends StatefulWidget {
+  final XFile? initialImage;
   final ValueChanged<XFile?> onImageSelected;
-  const _PhotoSection({required this.onImageSelected});
+
+  const _PhotoSection({this.initialImage, required this.onImageSelected});
 
   @override
-  State<_PhotoSection> createState() => _PhotoSectionState();
+  _PhotoSectionState createState() => _PhotoSectionState();
 }
 
 class _PhotoSectionState extends State<_PhotoSection> {
   XFile? _imageFile;
 
+  @override
+  void initState() {
+    super.initState();
+    _imageFile = widget.initialImage;
+  }
+
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
     if (image != null) {
       final savedPath = await saveImagePermanently(image);
       final savedImage = XFile(savedPath);
-      setState(() => _imageFile = savedImage);
+
+      setState(() {
+        _imageFile = savedImage;
+      });
+
       widget.onImageSelected(savedImage);
     }
   }
@@ -209,7 +256,7 @@ class _PhotoSectionState extends State<_PhotoSection> {
           child:
               _imageFile == null
                   ? const _EmptyImagePlaceholder()
-                  : _ImagePreview(imageFile: _imageFile!),
+                  : _ImagePreview(imageFile: _imageFile),
         ),
       ],
     );
@@ -217,8 +264,8 @@ class _PhotoSectionState extends State<_PhotoSection> {
 }
 
 class _ImagePreview extends StatelessWidget {
-  final XFile imageFile;
   const _ImagePreview({required this.imageFile});
+  final XFile? imageFile;
 
   @override
   Widget build(BuildContext context) {
@@ -229,7 +276,7 @@ class _ImagePreview extends StatelessWidget {
         shape: BoxShape.circle,
         border: Border.all(color: AppColors.background),
         image: DecorationImage(
-          image: FileImage(File(imageFile.path)),
+          image: FileImage(File(imageFile!.path)),
           fit: BoxFit.cover,
         ),
       ),
@@ -246,9 +293,9 @@ class _EmptyImagePlaceholder extends StatelessWidget {
       height: 200,
       width: 200,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(5),
         border: Border.all(color: AppColors.textFieldBorderColor),
+        borderRadius: BorderRadius.circular(5),
+        color: Colors.white,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -271,8 +318,10 @@ class _EmptyImagePlaceholder extends StatelessWidget {
 }
 
 class _SpeciesDropdown extends StatelessWidget {
+  final String? initialValue;
   final ValueChanged<String?> onChanged;
-  const _SpeciesDropdown({required this.onChanged});
+
+  const _SpeciesDropdown({this.initialValue, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -282,6 +331,7 @@ class _SpeciesDropdown extends StatelessWidget {
         const Text('Selecciona la especie', style: TextStyle(fontSize: 18)),
         const SizedBox(height: 5),
         DropdownButtonFormField<String>(
+          value: initialValue,
           hint: const Text('Selecciona una opción'),
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
@@ -302,8 +352,12 @@ class _SpeciesDropdown extends StatelessWidget {
           ),
           style: const TextStyle(color: Colors.black, fontSize: 16),
           dropdownColor: Colors.white,
-          validator:
-              (value) => value == null ? 'Este campo es obligatorio' : null,
+          validator: (value) {
+            if (value == null) {
+              return 'Este campo es obligatorio';
+            }
+            return null;
+          },
           items: const [
             DropdownMenuItem(value: 'Perro', child: Text('Perro')),
             DropdownMenuItem(value: 'Gato', child: Text('Gato')),

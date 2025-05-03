@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
 
-//Boton personalizable
+/// Botón personalizable de alto específico y con bordes redondeados.
 class CustomButton extends StatelessWidget {
   const CustomButton({
     super.key,
@@ -12,10 +12,10 @@ class CustomButton extends StatelessWidget {
     required this.height,
   });
 
-  final Color buttonColor;
   final String text;
+  final Color buttonColor;
   final Color foregroundColor;
-  final VoidCallback onPressed; // Callback para la accion del boton
+  final VoidCallback onPressed;
   final double height;
 
   @override
@@ -25,26 +25,25 @@ class CustomButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          textStyle: const TextStyle(fontSize: 18),
           backgroundColor: buttonColor,
+          foregroundColor: foregroundColor,
+          textStyle: const TextStyle(fontSize: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
           ),
           side: BorderSide(color: buttonColor),
         ),
-        child: Text(
-          text,
-          style: TextStyle(fontSize: 16, color: foregroundColor),
-        ),
+        child: Text(text),
       ),
     );
   }
 }
 
-// Boton de agregar
+/// Botón tipo "Añadir" con ícono de suma y estilo personalizado.
 class AddButton extends StatelessWidget {
   const AddButton({super.key, required this.onPressed});
-  final VoidCallback onPressed; // Callback para la accion del boton
+
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +52,7 @@ class AddButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(50),
@@ -76,6 +75,7 @@ class AddButton extends StatelessWidget {
   }
 }
 
+/// Botón de texto con subrayado y estilo personalizable.
 class CustomTextButton extends StatelessWidget {
   const CustomTextButton({
     super.key,

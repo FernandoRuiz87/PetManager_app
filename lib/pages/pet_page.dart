@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
+import 'package:pet_manager_app/models/pet.dart';
+import 'package:pet_manager_app/pages/edit_pet_info.dart';
 import 'package:pet_manager_app/widgets/common_widgets.dart';
 import 'package:pet_manager_app/widgets/custom_buttons.dart';
 import 'package:pet_manager_app/widgets/vaccine_card.dart';
@@ -9,10 +11,12 @@ class PetPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Pet pet = ModalRoute.of(context)!.settings.arguments as Pet;
+
     final padding = MediaQuery.of(context).padding;
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Rocky')),
+      appBar: AppBar(title: Text(pet.name)),
       body: Padding(
         padding: EdgeInsets.only(
           left: padding.left,
@@ -25,11 +29,11 @@ class PetPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(child: PetPicture(size: 75)),
+                Center(child: PetPicture(size: 75, imagePath: pet.photoUrl)),
                 SizedBox(height: 20),
-                _PetNameSection(),
+                _PetNameSection(pet: pet),
                 SizedBox(height: 20),
-                _ActionButtons(),
+                _ActionButtons(pet: pet),
                 SizedBox(height: 20),
                 _ExpansionTileSection(
                   title: 'Vacunas',
@@ -41,6 +45,15 @@ class PetPage extends StatelessWidget {
                   onAddPressed: () {},
                 ),
                 SizedBox(height: 20),
+                _ExpansionTileSection(
+                  title: 'Baños',
+                  icon: Icons.shower_outlined,
+                  onAddPressed: () {},
+                  itemBuilder: (contex, index) {
+                    return VaccineCard();
+                  },
+                  itemCount: 1,
+                ),
               ],
             ),
           ),
@@ -51,20 +64,21 @@ class PetPage extends StatelessWidget {
 }
 
 class _PetNameSection extends StatelessWidget {
-  const _PetNameSection();
+  final Pet pet;
+  const _PetNameSection({required this.pet});
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: const [
+      children: [
         Text(
-          'Rocky',
+          pet.name,
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 30, fontWeight: FontWeight.w600),
         ),
         SizedBox(height: 5),
         Text(
-          'Perro • Golden Retriever • 3 años',
+          '${pet.specie} • ${pet.breed} • ${pet.age} años',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 18, color: AppColors.textTertiary),
         ),
@@ -74,7 +88,8 @@ class _PetNameSection extends StatelessWidget {
 }
 
 class _ActionButtons extends StatelessWidget {
-  const _ActionButtons();
+  final Pet pet;
+  const _ActionButtons({required this.pet});
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +103,14 @@ class _ActionButtons extends StatelessWidget {
               buttonColor: AppColors.secondary,
               foregroundColor: AppColors.textPrimary,
               height: 35,
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditPetPage(pet: pet),
+                  ),
+                );
+              },
             ),
           ),
           const SizedBox(width: 10),

@@ -5,9 +5,16 @@ import 'package:pet_manager_app/pages/login_page.dart';
 import 'package:pet_manager_app/pages/new_pet_page.dart';
 import 'package:pet_manager_app/pages/pet_page.dart';
 import 'package:pet_manager_app/pages/register_page.dart';
+import 'package:pet_manager_app/providers/pet_provider.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => PetProvider())],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -23,6 +30,7 @@ class MainApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/pet': (context) => const PetPage(),
         '/newPet': (context) => const NewPetPage(),
+        // '/updatePet': (context) => const EditPetPage(), //
       },
       theme: ThemeData.light().copyWith(
         appBarTheme: const AppBarTheme(

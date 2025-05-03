@@ -96,7 +96,7 @@ class PetPicture extends StatelessWidget {
                         (_, __, ___) => Container(color: AppColors.secondary),
                   )
                   : Image.asset(
-                    "assets/images/default_pet.png",
+                    "assets/images/logo.png", // Cambiar por una imagen por defecto
                     fit: BoxFit.cover,
                     errorBuilder:
                         (_, __, ___) => Container(color: AppColors.secondary),

@@ -24,16 +24,7 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(fieldLabel, style: const TextStyle(fontSize: 18)),
-            if (isRequired)
-              const Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontSize: 18),
-              ),
-          ],
-        ),
+        _FieldLabel(label: fieldLabel, isRequired: isRequired),
         const SizedBox(height: 5),
         TextFormField(
           keyboardType:
@@ -71,7 +62,7 @@ class PasswordTextField extends StatefulWidget {
 class _PasswordTextFieldState extends State<PasswordTextField> {
   bool _showPassword = true;
 
-  void _changeVisibility() {
+  void _toggleVisibility() {
     setState(() {
       _showPassword = !_showPassword;
     });
@@ -82,16 +73,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(widget.fieldLabel, style: const TextStyle(fontSize: 18)),
-            if (widget.isRequired)
-              const Text(
-                ' *',
-                style: TextStyle(color: Colors.red, fontSize: 18),
-              ),
-          ],
-        ),
+        _FieldLabel(label: widget.fieldLabel, isRequired: widget.isRequired),
         const SizedBox(height: 5),
         TextFormField(
           controller: widget.controller,
@@ -101,7 +83,7 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
           decoration: _buildInputDecoration(
             widget.hintText,
             suffixIcon: IconButton(
-              onPressed: _changeVisibility,
+              onPressed: _toggleVisibility,
               icon: Icon(
                 _showPassword
                     ? Icons.visibility_outlined
@@ -111,6 +93,24 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _FieldLabel extends StatelessWidget {
+  final String label;
+  final bool isRequired;
+
+  const _FieldLabel({required this.label, required this.isRequired});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(label, style: const TextStyle(fontSize: 18)),
+        if (isRequired)
+          const Text(' *', style: TextStyle(color: Colors.red, fontSize: 18)),
       ],
     );
   }
