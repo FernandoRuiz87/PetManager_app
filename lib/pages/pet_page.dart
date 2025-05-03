@@ -4,6 +4,7 @@ import 'package:pet_manager_app/models/pet.dart';
 import 'package:pet_manager_app/pages/edit_pet_info.dart';
 import 'package:pet_manager_app/widgets/common_widgets.dart';
 import 'package:pet_manager_app/widgets/custom_buttons.dart';
+import 'package:pet_manager_app/widgets/shower_card.dart';
 import 'package:pet_manager_app/widgets/vaccine_card.dart';
 
 class PetPage extends StatelessWidget {
@@ -50,9 +51,34 @@ class PetPage extends StatelessWidget {
                   icon: Icons.shower_outlined,
                   onAddPressed: () {},
                   itemBuilder: (contex, index) {
-                    return VaccineCard();
+                    return ShowerCard();
                   },
                   itemCount: 1,
+                ),
+                SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 17.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.food_bank_outlined,
+                        color: AppColors.textPrimary,
+                        size: 30,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Alimentación',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      AddButton(onPressed: () {}),
+                      const SizedBox(width: 40),
+                    ],
+                  ),
                 ),
               ],
             ),
