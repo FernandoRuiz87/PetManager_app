@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
+import 'package:pet_manager_app/models/vaccine.dart';
 import 'package:pet_manager_app/widgets/custom_buttons.dart';
+import 'package:intl/intl.dart';
 
-// Card para vacunas
 class VaccineCard extends StatelessWidget {
-  const VaccineCard({super.key});
+  final Vaccine vaccine;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const VaccineCard({
+    super.key,
+    required this.vaccine,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +22,30 @@ class VaccineCard extends StatelessWidget {
       elevation: 0,
       color: AppColors.cardBackground,
       shape: _cardShape(),
-      child: Stack(children: [const _StatusIndicator(), const _CardContent()]),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: Stack(
+        children: [
+          _StatusIndicator(statusColor: _getStatusColor()),
+          _CardContent(vaccine: vaccine, onEdit: onEdit, onDelete: onDelete),
+        ],
+      ),
     );
+  }
+
+  Color _getStatusColor() {
+    final now = DateTime.now();
+    final dateFormat = DateFormat('yyyy-MM-dd');
+    final dueDate = dateFormat
+        .parse(vaccine.date)
+        .add(Duration(days: 30 * int.parse(vaccine.duration)));
+
+    return dueDate.isBefore(now)
+        ? AppColors
+            .alert // Vencida
+        : dueDate.difference(now).inDays < 30
+        ? AppColors
+            .warning // Por vencer
+        : AppColors.good; // Vigente
   }
 
   RoundedRectangleBorder _cardShape() {
@@ -25,34 +57,70 @@ class VaccineCard extends StatelessWidget {
 }
 
 class _CardContent extends StatelessWidget {
-  const _CardContent();
+  final Vaccine vaccine;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _CardContent({
+    required this.vaccine,
+    required this.onEdit,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [_VaccineInfo(), SizedBox(width: 10), _ActionButtons()],
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    final applicationDate = dateFormat.format(
+      DateFormat('yyyy-MM-dd').parse(vaccine.date),
+    );
+    final dueDate = dateFormat.format(
+      DateFormat('yyyy-MM-dd')
+          .parse(vaccine.date)
+          .add(Duration(days: 30 * int.parse(vaccine.duration))),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(30, 15, 15, 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: _VaccineInfo(
+              name: vaccine.name,
+              applicationDate: applicationDate,
+              dueDate: dueDate,
+            ),
+          ),
+          const SizedBox(width: 10),
+          _ActionButtons(onEdit: onEdit, onDelete: onDelete),
+        ],
+      ),
     );
   }
 }
 
 class _VaccineInfo extends StatelessWidget {
-  const _VaccineInfo();
+  final String name;
+  final String applicationDate;
+  final String dueDate;
+
+  const _VaccineInfo({
+    required this.name,
+    required this.applicationDate,
+    required this.dueDate,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(30, 15, 15, 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          _InfoText('Rabia', isTitle: true),
-          SizedBox(height: 5),
-          _InfoText('Aplicada: 01/01/2023', color: AppColors.textTertiary),
-          SizedBox(height: 5),
-          _InfoText('Vence: 01/01/2024', color: AppColors.good),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _InfoText(name, isTitle: true),
+        const SizedBox(height: 8),
+        _InfoText('Aplicada: $applicationDate', color: AppColors.textTertiary),
+        const SizedBox(height: 4),
+        _InfoText('Vence: $dueDate', color: AppColors.good),
+      ],
     );
   }
 }
@@ -69,32 +137,36 @@ class _InfoText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: isTitle ? 18 : 16,
+        fontSize: isTitle ? 20 : 16,
         fontWeight: isTitle ? FontWeight.w600 : FontWeight.normal,
-        color: color,
+        color: color ?? AppColors.textPrimary,
       ),
     );
   }
 }
 
 class _ActionButtons extends StatelessWidget {
-  const _ActionButtons();
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  const _ActionButtons({required this.onEdit, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
         CustomTextButton(
           text: 'Editar',
-          onPressed: () {},
+          onPressed: onEdit,
           textColor: AppColors.primary,
-          fontSize: 16,
+          fontSize: 14,
         ),
+        const SizedBox(height: 8),
         CustomTextButton(
           text: 'Eliminar',
-          onPressed: () {},
+          onPressed: onDelete,
           textColor: AppColors.alert,
-          fontSize: 16,
+          fontSize: 14,
         ),
       ],
     );
@@ -102,7 +174,9 @@ class _ActionButtons extends StatelessWidget {
 }
 
 class _StatusIndicator extends StatelessWidget {
-  const _StatusIndicator();
+  final Color statusColor;
+
+  const _StatusIndicator({required this.statusColor});
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +185,9 @@ class _StatusIndicator extends StatelessWidget {
       top: 0,
       bottom: 0,
       child: Container(
-        width: 20,
+        width: 12,
         decoration: BoxDecoration(
-          color: AppColors.good,
+          color: statusColor,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(10),
             bottomLeft: Radius.circular(10),

@@ -1,19 +1,28 @@
+import 'package:uuid/uuid.dart';
+
 class Vaccine {
+  final String id;
   final String name;
   final String date;
-  final String duration; // Duracion de la vacuna en meses
+  final String duration;
 
-  Vaccine(this.duration, {required this.name, required this.date});
+  Vaccine({
+    String? id,
+    required this.name,
+    required this.date,
+    required this.duration,
+  }) : id = id ?? const Uuid().v4();
 
   factory Vaccine.fromJson(Map<String, dynamic> json) {
     return Vaccine(
-      json['duration'] as String,
+      id: json['id'] as String?,
       name: json['name'] as String,
       date: json['date'] as String,
+      duration: json['duration'] as String,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'name': name, 'date': date, 'duration': duration};
+    return {'id': id, 'name': name, 'date': date, 'duration': duration};
   }
 }

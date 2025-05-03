@@ -1,13 +1,16 @@
-class Shower {
-  final String date; // Date of the shower
+import 'package:uuid/uuid.dart';
 
-  Shower({required this.date});
+class Shower {
+  final String id;
+  final String date;
+
+  Shower({String? id, required this.date}) : id = id ?? const Uuid().v4();
 
   factory Shower.fromJson(Map<String, dynamic> json) {
-    return Shower(date: json['date'] as String);
+    return Shower(id: json['id'] as String?, date: json['date'] as String);
   }
 
   Map<String, dynamic> toJson() {
-    return {'date': date};
+    return {'id': id, 'date': date};
   }
 }

@@ -1,70 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:intl/intl.dart';
+import 'package:pet_manager_app/models/feeding.dart';
 
-// Card para la información del alimento
 class FeedCard extends StatelessWidget {
-  const FeedCard({super.key});
+  final Feeding feeding;
+
+  const FeedCard({super.key, required this.feeding});
 
   @override
   Widget build(BuildContext context) {
-    // Datos de ejemplo -
-    const double totalFoodKg = 5.0;
-    const double dailyConsumptionGrams = 200.0;
-    final DateTime purchaseDate = DateTime.parse(
-      '2025-05-03',
-    ); // Usa el formato AAAA-MM-DD
-    final String formattedPurchaseDate = DateFormat(
-      'dd/MM',
-    ).format(purchaseDate);
-    final double totalFoodGrams = totalFoodKg * 1000;
-
-    // Calcula cuántos días han pasado desde la compra
-    final int daysSincePurchase =
-        DateTime.now().difference(purchaseDate).inDays;
-
-    // Calcula la cantidad de alimento consumido hasta ahora
-    final double consumedFoodGrams = daysSincePurchase * dailyConsumptionGrams;
-
-    // Calcula la cantidad restante de alimento
-    final double remainingFoodGrams = totalFoodGrams - consumedFoodGrams;
-
-    // Calcula el porcentaje restante (asegurándose de que no sea negativo)
-    final double progressValue =
-        (remainingFoodGrams > 0 && totalFoodGrams > 0)
-            ? (remainingFoodGrams / totalFoodGrams).clamp(0.0, 1.0)
-            : 0.0;
-
-    // Calcula los días restantes de comida
-    final int remainingDays =
-        remainingFoodGrams > 0
-            ? (remainingFoodGrams / dailyConsumptionGrams).ceil()
-            : 0;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Card(
         elevation: 0,
         color: AppColors.cardBackground,
         shape: _cardShape(),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _FeedInfo(
-                    dailyConsumptionGrams: dailyConsumptionGrams,
-                    totalFoodKg: totalFoodKg,
-                    formattedPurchaseDate: formattedPurchaseDate,
-                    remainingDays: remainingDays,
-                    progressValue: progressValue,
-                  ),
-                ],
-              ),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _FeedInfo(feeding: feeding),
+              const SizedBox(height: 15),
+              _ProgressBar(progressValue: feeding.progressValue),
+              const SizedBox(height: 10),
+              _RemainingDays(remainingDays: feeding.remainingDays),
+              if (feeding.notes != null && feeding.notes!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                _NotesSection(notes: feeding.notes!),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -78,43 +44,10 @@ class FeedCard extends StatelessWidget {
   }
 }
 
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.progressValue});
-
-  final double progressValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return LinearProgressIndicator(
-      borderRadius: BorderRadius.circular(50),
-      value: progressValue,
-      backgroundColor: Color(0xFFE9ECEF),
-      valueColor: AlwaysStoppedAnimation<Color>(
-        progressValue > 0.5
-            ? AppColors.good
-            : progressValue > 0.2
-            ? AppColors.warning
-            : Colors.redAccent, // Cambia el color según el progreso
-      ),
-      minHeight: 10,
-    );
-  }
-}
-
 class _FeedInfo extends StatelessWidget {
-  final double dailyConsumptionGrams;
-  final double totalFoodKg;
-  final String formattedPurchaseDate;
-  final int remainingDays;
-  final double progressValue;
+  final Feeding feeding;
 
-  const _FeedInfo({
-    required this.dailyConsumptionGrams,
-    required this.totalFoodKg,
-    required this.formattedPurchaseDate,
-    required this.remainingDays,
-    required this.progressValue,
-  });
+  const _FeedInfo({required this.feeding});
 
   @override
   Widget build(BuildContext context) {
@@ -122,18 +55,114 @@ class _FeedInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _InfoText(
-          'Consumo: ${dailyConsumptionGrams.toStringAsFixed(0)}g/día',
+          'Consumo: ${feeding.dailyConsumptionGrams.toStringAsFixed(0)}g/día',
           isTitle: true,
         ),
         const SizedBox(height: 5),
         _InfoText(
-          'Bolsa actual: ${totalFoodKg}kg (Comprada el $formattedPurchaseDate)',
+          'Bolsa actual: ${feeding.totalFoodKg}kg (Comprada el ${feeding.formattedPurchaseDate})',
           color: AppColors.textTertiary,
         ),
-        const SizedBox(height: 15),
-        _ProgressBar(progressValue: progressValue),
-        const SizedBox(height: 10),
-        _InfoText('Te queda para $remainingDays días'),
+      ],
+    );
+  }
+}
+
+class _ProgressBar extends StatelessWidget {
+  final double progressValue;
+
+  const _ProgressBar({required this.progressValue});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        LinearProgressIndicator(
+          borderRadius: BorderRadius.circular(50),
+          value: progressValue,
+          backgroundColor: const Color(0xFFE9ECEF),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            _getProgressColor(progressValue),
+          ),
+          minHeight: 10,
+        ),
+        const SizedBox(height: 5),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '0%',
+              style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+            ),
+            Text(
+              '${(progressValue * 100).toStringAsFixed(0)}% restante',
+              style: TextStyle(fontSize: 12, color: AppColors.textTertiary),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Color _getProgressColor(double value) {
+    if (value > 0.5) return AppColors.good;
+    if (value > 0.2) return AppColors.warning;
+    return AppColors.alert;
+  }
+}
+
+class _RemainingDays extends StatelessWidget {
+  final int remainingDays;
+
+  const _RemainingDays({required this.remainingDays});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          remainingDays > 7 ? Icons.check_circle : Icons.warning,
+          color: remainingDays > 7 ? AppColors.good : AppColors.warning,
+          size: 20,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          remainingDays > 0
+              ? 'Te queda para $remainingDays ${remainingDays == 1 ? 'día' : 'días'}'
+              : '¡Necesitas comprar más alimento!',
+          style: TextStyle(
+            fontSize: 16,
+            color: remainingDays > 7 ? AppColors.textPrimary : AppColors.alert,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NotesSection extends StatelessWidget {
+  final String notes;
+
+  const _NotesSection({required this.notes});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        const SizedBox(height: 8),
+        Text(
+          'Notas:',
+          style: TextStyle(
+            fontSize: 14,
+            color: AppColors.textTertiary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(notes, style: const TextStyle(fontSize: 14)),
       ],
     );
   }
@@ -151,9 +180,9 @@ class _InfoText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: isTitle ? 18 : 16,
+        fontSize: isTitle ? 18 : 14,
         fontWeight: isTitle ? FontWeight.w600 : FontWeight.normal,
-        color: color,
+        color: color ?? AppColors.textPrimary,
       ),
     );
   }

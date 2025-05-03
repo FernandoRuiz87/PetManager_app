@@ -5,7 +5,7 @@ import 'package:pet_manager_app/models/pet.dart';
 import 'package:pet_manager_app/providers/pet_provider.dart';
 import 'package:pet_manager_app/widgets/custom_buttons.dart';
 import 'package:pet_manager_app/widgets/custom_text_fields.dart';
-import 'package:pet_manager_app/widgets/shared_pet_form.dart';
+import 'package:pet_manager_app/pages/pets/widgets/shared_pet_form.dart';
 import 'package:provider/provider.dart';
 
 class EditPetPage extends StatefulWidget {

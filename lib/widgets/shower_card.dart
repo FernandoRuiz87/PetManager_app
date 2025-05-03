@@ -1,17 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:pet_manager_app/colors/app_colors.dart';
+import 'package:pet_manager_app/models/shower.dart';
+import 'package:intl/intl.dart';
 
-// Card para baños
 class ShowerCard extends StatelessWidget {
-  const ShowerCard({super.key});
+  final Shower shower;
+  final VoidCallback onDelete;
+
+  const ShowerCard({super.key, required this.shower, required this.onDelete});
 
   @override
   Widget build(BuildContext context) {
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    final showerDate = dateFormat.format(
+      DateFormat('yyyy-MM-dd').parse(shower.date),
+    );
+    final daysSinceShower =
+        DateTime.now()
+            .difference(DateFormat('yyyy-MM-dd').parse(shower.date))
+            .inDays;
+
     return Card(
       elevation: 0,
       color: AppColors.cardBackground,
       shape: _cardShape(),
-      child: Stack(children: [const _CardContent()]),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: _CardContent(
+        showerDate: showerDate,
+        daysSinceShower: daysSinceShower,
+        onDelete: onDelete,
+      ),
     );
   }
 
@@ -24,41 +42,60 @@ class ShowerCard extends StatelessWidget {
 }
 
 class _CardContent extends StatelessWidget {
-  const _CardContent();
+  final String showerDate;
+  final int daysSinceShower;
+  final VoidCallback onDelete;
+
+  const _CardContent({
+    required this.showerDate,
+    required this.daysSinceShower,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _ShowerInfo(),
-        const SizedBox(width: 40),
-        IconButton(
-          icon: Icon(Icons.delete, color: AppColors.alert),
-          onPressed: () {
-            // Acción al presionar el botón
-          },
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: _ShowerInfo(
+              showerDate: showerDate,
+              daysSinceShower: daysSinceShower,
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.delete, color: AppColors.alert),
+            onPressed: onDelete,
+            tooltip: 'Eliminar baño',
+          ),
+        ],
+      ),
     );
   }
 }
 
 class _ShowerInfo extends StatelessWidget {
-  const _ShowerInfo();
+  final String showerDate;
+  final int daysSinceShower;
+
+  const _ShowerInfo({required this.showerDate, required this.daysSinceShower});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(30, 25, 15, 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          _InfoText('Ultimo baño: 05/04/2025', isTitle: true),
-          SizedBox(height: 5),
-          _InfoText('(Hace 24 dias)', color: AppColors.textTertiary),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _InfoText('Baño: $showerDate', isTitle: true),
+        const SizedBox(height: 4),
+        _InfoText(
+          daysSinceShower == 0
+              ? '(Hoy)'
+              : '(Hace $daysSinceShower ${daysSinceShower == 1 ? 'día' : 'días'})',
+          color: AppColors.textTertiary,
+        ),
+      ],
     );
   }
 }
@@ -75,9 +112,9 @@ class _InfoText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: isTitle ? 18 : 16,
+        fontSize: isTitle ? 16 : 14,
         fontWeight: isTitle ? FontWeight.w600 : FontWeight.normal,
-        color: color,
+        color: color ?? AppColors.textPrimary,
       ),
     );
   }

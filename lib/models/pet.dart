@@ -54,4 +54,26 @@ class Pet {
       'showers': showers?.map((s) => s.toJson()).toList(),
     };
   }
+
+  Pet copyWith({
+    String? id,
+    String? name,
+    String? specie,
+    String? breed,
+    int? age,
+    String? photoUrl,
+    List<Vaccine>? vaccines,
+    List<Shower>? showers,
+  }) {
+    return Pet(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      specie: specie ?? this.specie,
+      breed: breed ?? this.breed,
+      age: age ?? this.age,
+      photoUrl: photoUrl ?? this.photoUrl,
+      vaccines: vaccines != null ? List<Vaccine>.from(vaccines) : this.vaccines,
+      showers: showers != null ? List<Shower>.from(showers) : this.showers,
+    );
+  }
 }

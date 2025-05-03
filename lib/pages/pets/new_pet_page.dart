@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pet_manager_app/widgets/shared_pet_form.dart';
+import 'package:pet_manager_app/pages/pets/widgets/shared_pet_form.dart';
 import 'package:provider/provider.dart';
 
 import 'package:pet_manager_app/colors/app_colors.dart';
