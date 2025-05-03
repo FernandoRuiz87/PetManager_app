@@ -6,30 +6,42 @@ class CustomTextField extends StatelessWidget {
     super.key,
     required this.fieldLabel,
     required this.defaultText,
+    this.controller,
+    this.validator,
+    required this.isNumberField,
+    this.isRequired = false,
   });
+
   final String fieldLabel;
   final String defaultText;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final bool isNumberField;
+  final bool isRequired;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(fieldLabel, style: TextStyle(fontSize: 18)),
+        Row(
+          children: [
+            Text(fieldLabel, style: const TextStyle(fontSize: 18)),
+            if (isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(color: Colors.red, fontSize: 18),
+              ),
+          ],
+        ),
         const SizedBox(height: 5),
-        TextField(
+        TextFormField(
+          keyboardType:
+              isNumberField ? TextInputType.number : TextInputType.text,
+          controller: controller,
+          validator: validator,
           cursorColor: AppColors.primary,
-          decoration: InputDecoration(
-            hintText: defaultText,
-            filled: true,
-            fillColor: AppColors.textSecondary,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.textFieldBorderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-          ),
+          decoration: _buildInputDecoration(defaultText),
         ),
       ],
     );
@@ -41,10 +53,16 @@ class PasswordTextField extends StatefulWidget {
     super.key,
     required this.fieldLabel,
     required this.hintText,
+    this.controller,
+    this.validator,
+    this.isRequired = false,
   });
 
   final String fieldLabel;
   final String hintText;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final bool isRequired;
 
   @override
   State<PasswordTextField> createState() => _PasswordTextFieldState();
@@ -64,21 +82,24 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(widget.fieldLabel, style: const TextStyle(fontSize: 18)),
+        Row(
+          children: [
+            Text(widget.fieldLabel, style: const TextStyle(fontSize: 18)),
+            if (widget.isRequired)
+              const Text(
+                ' *',
+                style: TextStyle(color: Colors.red, fontSize: 18),
+              ),
+          ],
+        ),
         const SizedBox(height: 5),
-        TextField(
+        TextFormField(
+          controller: widget.controller,
+          validator: widget.validator,
           obscureText: _showPassword,
           cursorColor: AppColors.primary,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.textSecondary,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.textFieldBorderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
-            ),
-            hintText: widget.hintText,
+          decoration: _buildInputDecoration(
+            widget.hintText,
             suffixIcon: IconButton(
               onPressed: _changeVisibility,
               icon: Icon(
@@ -93,4 +114,25 @@ class _PasswordTextFieldState extends State<PasswordTextField> {
       ],
     );
   }
+}
+
+InputDecoration _buildInputDecoration(String hintText, {Widget? suffixIcon}) {
+  return InputDecoration(
+    hintText: hintText,
+    filled: true,
+    fillColor: AppColors.textSecondary,
+    enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColors.textFieldBorderColor),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColors.primary, width: 2),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColors.alert),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColors.alert, width: 2),
+    ),
+    suffixIcon: suffixIcon,
+  );
 }
