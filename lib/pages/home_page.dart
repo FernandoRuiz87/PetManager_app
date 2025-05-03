@@ -88,7 +88,9 @@ class ActionSeparator extends StatelessWidget {
           'Mis mascotas',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
         ),
-        AddButton(
+        GenericButton(
+          icon: Icons.add,
+          text: 'Añadir',
           onPressed: () {
             Navigator.pushNamed(context, '/newPet');
           },

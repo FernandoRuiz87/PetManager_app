@@ -111,9 +111,16 @@ class _EditPetPageState extends State<EditPetPage> {
 
   @override
   Widget build(BuildContext context) {
+    final padding = MediaQuery.of(context).padding;
     return Scaffold(
       appBar: AppBar(title: const Text('Editar mascota')),
-      body: SafeArea(
+      body: Padding(
+        padding: EdgeInsets.only(
+          left: padding.left,
+          right: padding.right,
+          top: padding.top,
+          bottom: padding.bottom,
+        ),
         child: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -246,11 +253,13 @@ class _PhotoSectionState extends State<_PhotoSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          'Selecciona la foto de tu mascota',
-          style: TextStyle(fontSize: 18),
+        Center(
+          child: const Text(
+            'Toca para editar la foto',
+            style: TextStyle(fontSize: 18),
+          ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 10),
         GestureDetector(
           onTap: _pickImage,
           child:

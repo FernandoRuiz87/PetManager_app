@@ -40,10 +40,17 @@ class CustomButton extends StatelessWidget {
 }
 
 /// Botón tipo "Añadir" con ícono de suma y estilo personalizado.
-class AddButton extends StatelessWidget {
-  const AddButton({super.key, required this.onPressed});
+class GenericButton extends StatelessWidget {
+  const GenericButton({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    required this.text,
+  });
 
   final VoidCallback onPressed;
+  final IconData icon;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +66,13 @@ class AddButton extends StatelessWidget {
           ),
           side: const BorderSide(color: AppColors.primary),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.add, color: AppColors.secondary, size: 20),
+            Icon(icon, color: AppColors.secondary, size: 20),
             SizedBox(width: 15),
             Text(
-              'Añadir',
+              text,
               style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
             ),
           ],

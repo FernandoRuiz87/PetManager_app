@@ -41,52 +41,31 @@ class FeedCard extends StatelessWidget {
             ? (remainingFoodGrams / dailyConsumptionGrams).ceil()
             : 0;
 
-    return Card(
-      elevation: 0,
-      color: AppColors.cardBackground,
-      shape: _cardShape(),
-      child: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(
-              15.0,
-            ), // Añade un poco de padding alrededor del contenido
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _FeedInfo(
-                  dailyConsumptionGrams: dailyConsumptionGrams,
-                  totalFoodKg: totalFoodKg,
-                  formattedPurchaseDate: formattedPurchaseDate,
-                  remainingDays: remainingDays,
-                ),
-                const SizedBox(height: 15),
-                // Barra de progreso
-                LinearProgressIndicator(
-                  borderRadius: BorderRadius.circular(50),
-                  value: progressValue,
-                  backgroundColor: Color(0xFFE9ECEF),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    progressValue > 0.5
-                        ? AppColors.good
-                        : progressValue > 0.2
-                        ? AppColors.warning
-                        : Colors.redAccent, // Cambia el color según el progreso
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Card(
+        elevation: 0,
+        color: AppColors.cardBackground,
+        shape: _cardShape(),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _FeedInfo(
+                    dailyConsumptionGrams: dailyConsumptionGrams,
+                    totalFoodKg: totalFoodKg,
+                    formattedPurchaseDate: formattedPurchaseDate,
+                    remainingDays: remainingDays,
+                    progressValue: progressValue,
                   ),
-                  minHeight: 10,
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  '${remainingFoodGrams > 0 ? remainingFoodGrams.toStringAsFixed(0) : 0}g restantes',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -99,17 +78,42 @@ class FeedCard extends StatelessWidget {
   }
 }
 
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({required this.progressValue});
+
+  final double progressValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return LinearProgressIndicator(
+      borderRadius: BorderRadius.circular(50),
+      value: progressValue,
+      backgroundColor: Color(0xFFE9ECEF),
+      valueColor: AlwaysStoppedAnimation<Color>(
+        progressValue > 0.5
+            ? AppColors.good
+            : progressValue > 0.2
+            ? AppColors.warning
+            : Colors.redAccent, // Cambia el color según el progreso
+      ),
+      minHeight: 10,
+    );
+  }
+}
+
 class _FeedInfo extends StatelessWidget {
   final double dailyConsumptionGrams;
   final double totalFoodKg;
   final String formattedPurchaseDate;
   final int remainingDays;
+  final double progressValue;
 
   const _FeedInfo({
     required this.dailyConsumptionGrams,
     required this.totalFoodKg,
     required this.formattedPurchaseDate,
     required this.remainingDays,
+    required this.progressValue,
   });
 
   @override
@@ -126,8 +130,10 @@ class _FeedInfo extends StatelessWidget {
           'Bolsa actual: ${totalFoodKg}kg (Comprada el $formattedPurchaseDate)',
           color: AppColors.textTertiary,
         ),
-        const SizedBox(height: 5),
-        _InfoText('Te queda para ${remainingDays} días'),
+        const SizedBox(height: 15),
+        _ProgressBar(progressValue: progressValue),
+        const SizedBox(height: 10),
+        _InfoText('Te queda para $remainingDays días'),
       ],
     );
   }

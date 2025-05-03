@@ -93,8 +93,12 @@ class _FeedSection extends StatelessWidget {
                   ),
                 ),
               ),
-              AddButton(onPressed: () {}),
-              const SizedBox(width: 20),
+              GenericButton(
+                icon: Icons.settings,
+                text: 'Configurar',
+                onPressed: () {},
+              ),
+              const SizedBox(width: 38),
             ],
           ),
           FeedCard(),
@@ -225,7 +229,7 @@ class _ExpansionTileTittle extends StatelessWidget {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
           ),
-          AddButton(onPressed: () {}),
+          GenericButton(icon: Icons.add, text: 'Añadir', onPressed: () {}),
         ],
       ),
     );
