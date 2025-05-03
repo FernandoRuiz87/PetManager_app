@@ -4,6 +4,7 @@ import 'package:pet_manager_app/models/vaccine.dart';
 class Pet {
   final String name;
   final String specie;
+  final String? breed; // raza
   final int age;
   final String? photoUrl;
   final List<Vaccine>? vaccines;
@@ -12,6 +13,7 @@ class Pet {
   Pet({
     required this.name,
     required this.specie,
+    this.breed,
     required this.age,
     this.photoUrl,
     this.vaccines,
@@ -22,6 +24,7 @@ class Pet {
     return Pet(
       name: json['name'] as String,
       specie: json['specie'] as String,
+      breed: json['breed'] as String?,
       age: json['age'] as int,
       photoUrl: json['photoUrl'] as String?,
       vaccines:
@@ -39,6 +42,7 @@ class Pet {
     return {
       'name': name,
       'specie': specie,
+      'breed': breed,
       'age': age,
       'photoUrl': photoUrl,
       'vaccines': vaccines?.map((v) => v.toJson()).toList(),
