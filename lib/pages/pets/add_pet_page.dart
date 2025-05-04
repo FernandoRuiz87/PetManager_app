@@ -1,27 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:pet_manager_app/pages/pets/widgets/shared_pet_form.dart';
-import 'package:provider/provider.dart';
+import 'package:pet_manager/pages/pets/shared_pet_form.dart';
+import 'package:pet_manager/styles/app_colors.dart';
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/text_fields.dart';
 
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/models/pet.dart';
-import 'package:pet_manager_app/providers/pet_provider.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/custom_text_fields.dart';
-
-class NewPetPage extends StatefulWidget {
-  const NewPetPage({super.key});
+class AddPetPage extends StatefulWidget {
+  const AddPetPage({super.key});
 
   @override
-  State<NewPetPage> createState() => _NewPetPageState();
+  State<AddPetPage> createState() => _AddPetPageState();
 }
 
-class _NewPetPageState extends State<NewPetPage> {
+class _AddPetPageState extends State<AddPetPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _breedController = TextEditingController();
   final _ageController = TextEditingController();
+  // ignore: unused_field
   XFile? _petImage;
+  // ignore: unused_field
   String? _selectedSpecies;
 
   @override
@@ -34,7 +32,22 @@ class _NewPetPageState extends State<NewPetPage> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
-      _savePet();
+      _clearForm();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Mascota agregada correctamente.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: AppColors.good,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
       Navigator.pop(context, '/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -55,18 +68,7 @@ class _NewPetPageState extends State<NewPetPage> {
     }
   }
 
-  Future<void> _savePet() async {
-    final newPet = Pet(
-      name: _nameController.text,
-      specie: _selectedSpecies!,
-      age: int.parse(_ageController.text),
-      breed: _breedController.text,
-      photoUrl: _petImage?.path ?? '',
-    );
-
-    final petProvider = Provider.of<PetProvider>(context, listen: false);
-    await petProvider.addPet(newPet);
-
+  void _clearForm() {
     _nameController.clear();
     _breedController.clear();
     _ageController.clear();
@@ -106,6 +108,7 @@ class _NewPetPageState extends State<NewPetPage> {
                   ),
                   const SizedBox(height: 20),
                   SpeciesDropdown(
+                    value: _selectedSpecies,
                     onChanged: (value) {
                       setState(() => _selectedSpecies = value);
                     },
@@ -156,8 +159,9 @@ class _NewPetPageState extends State<NewPetPage> {
 
   String? _ageValidator(String? value) {
     if (value == null || value.isEmpty) return 'Este campo es obligatorio';
-    if (int.tryParse(value) == null)
+    if (int.tryParse(value) == null) {
       return 'Por favor ingresa un número válido';
+    }
     return null;
   }
 }

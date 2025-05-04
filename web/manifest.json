@@ -1,6 +1,6 @@
 {
-    "name": "pet_manager_app",
-    "short_name": "pet_manager_app",
+    "name": "pet_manager",
+    "short_name": "pet_manager",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

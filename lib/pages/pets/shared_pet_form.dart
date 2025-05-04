@@ -1,18 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-
-// Función compartida para guardar imágenes
-Future<String> saveImagePermanently(XFile image) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final name = p.basename(image.path);
-  final imagePath = p.join(directory.path, name);
-  final newImage = await File(image.path).copy(imagePath);
-  return newImage.path;
-}
+import 'package:pet_manager/styles/app_colors.dart';
 
 /// Widget para la sección de foto de mascota (reutilizable)
 class PetPhotoSection extends StatefulWidget {
@@ -44,10 +33,8 @@ class _PetPhotoSectionState extends State<PetPhotoSection> {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      final savedPath = await saveImagePermanently(image);
-      final savedImage = XFile(savedPath);
-      setState(() => _imageFile = savedImage);
-      widget.onImageSelected(savedImage);
+      setState(() => _imageFile = image);
+      widget.onImageSelected(image);
     }
   }
 
@@ -129,13 +116,13 @@ class EmptyImagePlaceholder extends StatelessWidget {
 
 /// Dropdown de especies (reutilizable)
 class SpeciesDropdown extends StatelessWidget {
-  final String? initialValue;
+  final String? value; // Renombrado para reflejar mejor su propósito
   final ValueChanged<String?> onChanged;
   final String? Function(String?)? validator;
 
   const SpeciesDropdown({
     super.key,
-    this.initialValue,
+    required this.value,
     required this.onChanged,
     this.validator,
   });
@@ -148,7 +135,7 @@ class SpeciesDropdown extends StatelessWidget {
         const Text('Selecciona la especie', style: TextStyle(fontSize: 18)),
         const SizedBox(height: 5),
         DropdownButtonFormField<String>(
-          value: initialValue,
+          value: value,
           hint: const Text('Selecciona una opción'),
           decoration: const InputDecoration(
             border: OutlineInputBorder(),

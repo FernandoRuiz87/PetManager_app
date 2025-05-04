@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/widgets/custom_text_fields.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/common_widgets.dart';
+import 'package:pet_manager/styles/app_colors.dart';
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/common_widgets.dart';
+import 'package:pet_manager/widgets/text_fields.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});

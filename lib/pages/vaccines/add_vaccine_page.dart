@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/models/vaccine.dart';
-import 'package:pet_manager_app/providers/pet_provider.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/custom_text_fields.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:pet_manager/styles/app_colors.dart';
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/text_fields.dart';
 
-class NewVaccinePage extends StatefulWidget {
-  final String petId;
-
-  const NewVaccinePage({super.key, required this.petId});
+class AddVaccinePage extends StatefulWidget {
+  const AddVaccinePage({super.key});
 
   @override
-  State<NewVaccinePage> createState() => _NewVaccinePageState();
+  State<AddVaccinePage> createState() => _AddVaccinePageState();
 }
 
-class _NewVaccinePageState extends State<NewVaccinePage> {
+class _AddVaccinePageState extends State<AddVaccinePage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _durationController = TextEditingController();
@@ -34,7 +29,22 @@ class _NewVaccinePageState extends State<NewVaccinePage> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate() && _validateDate()) {
-      _saveVaccine();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Vacuna agregada correctamente.',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: AppColors.good,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          margin: EdgeInsets.all(16),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      Navigator.pop(context);
     }
   }
 
@@ -49,21 +59,6 @@ class _NewVaccinePageState extends State<NewVaccinePage> {
       _dateError = null;
     });
     return true;
-  }
-
-  Future<void> _saveVaccine() async {
-    final newVaccine = Vaccine(
-      name: _nameController.text,
-      date: DateFormat('yyyy-MM-dd').format(_selectedDate!),
-      duration: _durationController.text,
-    );
-
-    final petProvider = Provider.of<PetProvider>(context, listen: false);
-    await petProvider.addVaccine(widget.petId, newVaccine);
-
-    if (mounted) {
-      Navigator.of(context).pop(true); // Retorna true indicando éxito
-    }
   }
 
   Future<void> _selectDate(BuildContext context) async {

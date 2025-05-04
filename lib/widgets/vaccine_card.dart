@@ -1,20 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/models/vaccine.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
+import 'package:pet_manager/models/vaccine.dart';
+import 'package:pet_manager/pages/vaccines/edit_vaccine_page.dart';
+import 'package:pet_manager/styles/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/common_widgets.dart';
 
 class VaccineCard extends StatelessWidget {
   final Vaccine vaccine;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
 
-  const VaccineCard({
-    super.key,
-    required this.vaccine,
-    required this.onEdit,
-    required this.onDelete,
-  });
+  const VaccineCard({super.key, required this.vaccine});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +21,7 @@ class VaccineCard extends StatelessWidget {
       child: Stack(
         children: [
           _StatusIndicator(statusColor: _getStatusColor()),
-          _CardContent(vaccine: vaccine, onEdit: onEdit, onDelete: onDelete),
+          _CardContent(vaccine: vaccine, statusColor: _getStatusColor()),
         ],
       ),
     );
@@ -58,14 +53,9 @@ class VaccineCard extends StatelessWidget {
 
 class _CardContent extends StatelessWidget {
   final Vaccine vaccine;
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
+  final Color statusColor;
 
-  const _CardContent({
-    required this.vaccine,
-    required this.onEdit,
-    required this.onDelete,
-  });
+  const _CardContent({required this.vaccine, required this.statusColor});
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +79,66 @@ class _CardContent extends StatelessWidget {
               name: vaccine.name,
               applicationDate: applicationDate,
               dueDate: dueDate,
+              statusColor: statusColor,
             ),
           ),
-          const SizedBox(width: 10),
-          _ActionButtons(onEdit: onEdit, onDelete: onDelete),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(width: 10),
+              CustomTextButton(
+                text: 'Editar',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditVaccinePage(vaccine: vaccine),
+                    ),
+                  );
+                },
+                textColor: AppColors.primary,
+                fontSize: 16,
+              ),
+              const SizedBox(width: 10),
+              CustomTextButton(
+                text: 'Eliminar',
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder:
+                        (context) => ConfirmationModal(
+                          title: 'Confirmar cambios',
+                          content:
+                              '¿Estás seguro de que desea eliminar esta vacuna?',
+                          confirmationMessage: 'Eliminar',
+                          confirmationColor: AppColors.alert,
+                          onConfirm: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Vacuna eliminada correctamente.',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                backgroundColor: AppColors.good,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
+                                ),
+                                margin: EdgeInsets.all(16),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          },
+                        ),
+                  );
+                },
+                textColor: AppColors.alert,
+                fontSize: 16,
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -103,11 +149,13 @@ class _VaccineInfo extends StatelessWidget {
   final String name;
   final String applicationDate;
   final String dueDate;
+  final Color statusColor;
 
   const _VaccineInfo({
     required this.name,
     required this.applicationDate,
     required this.dueDate,
+    required this.statusColor,
   });
 
   @override
@@ -119,7 +167,7 @@ class _VaccineInfo extends StatelessWidget {
         const SizedBox(height: 8),
         _InfoText('Aplicada: $applicationDate', color: AppColors.textTertiary),
         const SizedBox(height: 4),
-        _InfoText('Vence: $dueDate', color: AppColors.good),
+        _InfoText('Vence: $dueDate', color: statusColor),
       ],
     );
   }
@@ -141,34 +189,6 @@ class _InfoText extends StatelessWidget {
         fontWeight: isTitle ? FontWeight.w600 : FontWeight.normal,
         color: color ?? AppColors.textPrimary,
       ),
-    );
-  }
-}
-
-class _ActionButtons extends StatelessWidget {
-  final VoidCallback onEdit;
-  final VoidCallback onDelete;
-
-  const _ActionButtons({required this.onEdit, required this.onDelete});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        CustomTextButton(
-          text: 'Editar',
-          onPressed: onEdit,
-          textColor: AppColors.primary,
-          fontSize: 14,
-        ),
-        const SizedBox(height: 8),
-        CustomTextButton(
-          text: 'Eliminar',
-          onPressed: onDelete,
-          textColor: AppColors.alert,
-          fontSize: 14,
-        ),
-      ],
     );
   }
 }

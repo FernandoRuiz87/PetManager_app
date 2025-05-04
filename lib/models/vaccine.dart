@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 class Vaccine {
   final String id;
   final String name;
@@ -7,15 +5,15 @@ class Vaccine {
   final String duration;
 
   Vaccine({
-    String? id,
+    required this.id,
     required this.name,
     required this.date,
     required this.duration,
-  }) : id = id ?? const Uuid().v4();
+  });
 
   factory Vaccine.fromJson(Map<String, dynamic> json) {
     return Vaccine(
-      id: json['id'] as String?,
+      id: json['id'] as String,
       name: json['name'] as String,
       date: json['date'] as String,
       duration: json['duration'] as String,

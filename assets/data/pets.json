@@ -1,0 +1,39 @@
+[
+  {
+    "id": "1",
+    "name": "Max",
+    "specie": "Dog",
+    "breed": "Golden Retriever",
+    "age": 5,
+    "photoUrl": "https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600.jpg",
+    "vaccines": [
+      {
+        "id": "1",
+        "name": "Rabies",
+        "date": "2022-01-15",
+        "duration": "2"
+      },
+      {
+        "id": "2",
+        "name": "Distemper",
+        "date": "2022-01-15",
+        "duration": "2"
+      }
+    ],
+    "showers": [
+      {
+        "date": "2023-03-01"
+      },
+      {
+        "date": "2023-04-01"
+      }
+    ],
+    "feedings": {
+      "id": "1",
+      "petId": "1",
+      "totalFoodKg": 10.0,
+      "dailyConsumptionGrams": 200.0,
+      "purchaseDate": "2025-04-01"
+    }
+  }
+]

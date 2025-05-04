@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/pages/vaccines/edit_vaccine_info.dart';
-import 'package:pet_manager_app/pages/home_page.dart';
-import 'package:pet_manager_app/pages/login_page.dart';
-import 'package:pet_manager_app/pages/pets/new_pet_page.dart';
-import 'package:pet_manager_app/pages/pets/pet_page.dart';
-import 'package:pet_manager_app/pages/register_page.dart';
-import 'package:pet_manager_app/providers/pet_provider.dart';
-import 'package:provider/provider.dart';
+import 'package:pet_manager/pages/feed_configuration_page.dart';
+import 'package:pet_manager/pages/home_page.dart';
+import 'package:pet_manager/pages/login_page.dart';
+import 'package:pet_manager/pages/pets/add_pet_page.dart';
+import 'package:pet_manager/pages/pets/pet_page.dart';
+import 'package:pet_manager/pages/register_page.dart';
+import 'package:pet_manager/pages/vaccines/add_vaccine_page.dart';
+import 'package:pet_manager/styles/app_colors.dart';
 
 void main() {
-  runApp(
-    MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => PetProvider())],
-      child: const MainApp(),
-    ),
-  );
+  runApp(const MainApp());
 }
 
 class MainApp extends StatelessWidget {
@@ -24,14 +18,17 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisterPage(),
         '/home': (context) => const HomePage(),
         '/pet': (context) => const PetPage(),
-        '/newPet': (context) => const NewPetPage(),
-        '/updateVaccine': (context) => const EditVaccinePage(), //
+        '/newPet': (context) => const AddPetPage(),
+        '/newVaccine': (context) => const AddVaccinePage(),
+        '/feedConfiguration': (context) => const FeedConfigurationPage(),
+        // '/editPet': (context) => const EditPetPage(), //
+        // '/updateVaccine': (context) => const EditVaccinePage(), //
       },
       theme: ThemeData.light().copyWith(
         appBarTheme: const AppBarTheme(

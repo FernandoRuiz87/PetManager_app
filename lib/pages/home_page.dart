@@ -1,10 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/models/pet.dart';
-import 'package:pet_manager_app/providers/pet_provider.dart';
-import 'package:pet_manager_app/widgets/common_widgets.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/pet_card.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart'; // To load assets
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/pet_card.dart';
+import 'package:pet_manager/models/pet.dart'; // Import Pet model
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,18 +13,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Pet> pets = [];
+
   @override
   void initState() {
     super.initState();
-    // Cargar mascotas una sola vez al iniciar
-    Future.microtask(
-      () => Provider.of<PetProvider>(context, listen: false).loadPets(),
-    );
+    _loadPets();
+  }
+
+  Future<void> _loadPets() async {
+    try {
+      final String response = await rootBundle.loadString(
+        'assets/data/pets.json',
+      );
+
+      final List<dynamic> data = json.decode(response);
+
+      setState(() {
+        pets = data.map((json) => Pet.fromJson(json)).toList();
+      });
+    } catch (e) {
+      // Handle errors gracefully
+      debugPrint('Error loading pets: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final petProvider = Provider.of<PetProvider>(context);
     final padding = MediaQuery.of(context).padding;
 
     return Scaffold(
@@ -44,22 +58,18 @@ class _HomePageState extends State<HomePage> {
               children: [
                 const ActionSeparator(),
                 const SizedBox(height: 15),
-                _buildPetList(petProvider.pets),
+                _buildPetList(),
               ],
             ),
           ),
         ),
       ),
-      bottomNavigationBar: NavBar(currentIndex: 0),
     );
   }
 
-  Widget _buildPetList(List<Pet> pets) {
+  Widget _buildPetList() {
     if (pets.isEmpty) {
-      return const Text(
-        'No hay mascotas registradas',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     return Column(
