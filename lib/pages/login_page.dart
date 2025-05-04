@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/widgets/custom_text_fields.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/common_widgets.dart';
+import 'package:flutter/services.dart';
+import 'package:pet_manager/styles/app_colors.dart';
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/common_widgets.dart';
+import 'package:pet_manager/widgets/text_fields.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -23,15 +26,67 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
+  void _submitForm() async {
+    if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
             'Por favor completa todos los campos correctamente.',
             style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: AppColors.alert,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Cargar JSON de usuarios desde assets
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/users.json',
+      );
+      final Map<String, dynamic> jsonMap = json.decode(jsonString);
+      final List<dynamic> users = jsonMap['users'];
+
+      // Verificar las credenciales ingresadas
+      final user = users.firstWhere(
+        (u) =>
+            u['email'] == _emailController.text &&
+            u['password'] == _passwordController.text,
+        orElse: () => null,
+      );
+
+      if (user != null) {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              'Credenciales inválidas',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: AppColors.alert,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al cargar usuarios: $error',
+            style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: AppColors.alert,
           behavior: SnackBarBehavior.floating,

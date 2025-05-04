@@ -1,44 +1,50 @@
-import 'package:pet_manager_app/models/shower.dart';
-import 'package:pet_manager_app/models/vaccine.dart';
-import 'package:uuid/uuid.dart';
+import 'package:pet_manager/models/feed.dart';
+import 'package:pet_manager/models/shower.dart';
+import 'package:pet_manager/models/vaccine.dart';
 
 class Pet {
   final String id;
   final String name;
   final String specie;
-  final String? breed; // raza
+  final String? breed;
   final int age;
   final String? photoUrl;
-  final List<Vaccine>? vaccines;
-  final List<Shower>? showers;
+  final List<Vaccine> vaccines;
+  final List<Shower> showers;
+  final Feeding feedings;
 
   Pet({
-    String? id,
+    required this.id,
     required this.name,
     required this.specie,
     this.breed,
     required this.age,
     this.photoUrl,
-    this.vaccines,
-    this.showers,
-  }) : id = id ?? const Uuid().v4(); // Genera ID si no se proporciona ;
+    List<Vaccine>? vaccines,
+    List<Shower>? showers,
+    required this.feedings,
+  }) : vaccines = vaccines ?? [],
+       showers = showers ?? [];
 
   factory Pet.fromJson(Map<String, dynamic> json) {
     return Pet(
-      id: json['id'] as String? ?? const Uuid().v4(),
-      name: json['name'] as String,
-      specie: json['specie'] as String,
-      breed: json['breed'] as String?,
-      age: json['age'] as int,
-      photoUrl: json['photoUrl'] as String?,
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      specie: json['specie']?.toString() ?? '',
+      breed: json['breed']?.toString(),
+      age: (json['age'] as num?)?.toInt() ?? 0,
+      photoUrl: json['photoUrl']?.toString(),
       vaccines:
           (json['vaccines'] as List<dynamic>?)
               ?.map((v) => Vaccine.fromJson(v as Map<String, dynamic>))
-              .toList(),
+              .toList() ??
+          [],
       showers:
           (json['showers'] as List<dynamic>?)
               ?.map((s) => Shower.fromJson(s as Map<String, dynamic>))
-              .toList(),
+              .toList() ??
+          [],
+      feedings: Feeding.fromJson(json['feedings'] as Map<String, dynamic>),
     );
   }
 
@@ -50,30 +56,9 @@ class Pet {
       'breed': breed,
       'age': age,
       'photoUrl': photoUrl,
-      'vaccines': vaccines?.map((v) => v.toJson()).toList(),
-      'showers': showers?.map((s) => s.toJson()).toList(),
+      'vaccines': vaccines.map((v) => v.toJson()).toList(),
+      'showers': showers.map((s) => s.toJson()).toList(),
+      'feedings': feedings.toJson(),
     };
-  }
-
-  Pet copyWith({
-    String? id,
-    String? name,
-    String? specie,
-    String? breed,
-    int? age,
-    String? photoUrl,
-    List<Vaccine>? vaccines,
-    List<Shower>? showers,
-  }) {
-    return Pet(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      specie: specie ?? this.specie,
-      breed: breed ?? this.breed,
-      age: age ?? this.age,
-      photoUrl: photoUrl ?? this.photoUrl,
-      vaccines: vaccines != null ? List<Vaccine>.from(vaccines) : this.vaccines,
-      showers: showers != null ? List<Shower>.from(showers) : this.showers,
-    );
   }
 }

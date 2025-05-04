@@ -1,16 +1,13 @@
-import 'package:uuid/uuid.dart';
-
 class Shower {
-  final String id;
-  final String date;
+  final String date; // Changed to String to match the rest of the codebase
 
-  Shower({String? id, required this.date}) : id = id ?? const Uuid().v4();
+  Shower({required this.date});
 
   factory Shower.fromJson(Map<String, dynamic> json) {
-    return Shower(id: json['id'] as String?, date: json['date'] as String);
+    return Shower(date: json['date'] as String); // Removed DateTime parsing
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'date': date};
+    return {'date': date}; // Removed DateTime conversion
   }
 }

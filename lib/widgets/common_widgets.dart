@@ -1,6 +1,6 @@
-import 'package:pet_manager_app/colors/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
+
+import 'package:pet_manager/styles/app_colors.dart';
 
 // Header para el login y la pagina de registro
 class Header extends StatelessWidget {
@@ -72,6 +72,7 @@ class SectionDivider extends StatelessWidget {
   }
 }
 
+// Widget para mostrar la foto de la mascota
 class PetPicture extends StatelessWidget {
   const PetPicture({super.key, required this.size, this.imagePath});
 
@@ -80,55 +81,146 @@ class PetPicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: size,
-      backgroundColor: AppColors.background,
-      child: ClipOval(
-        child: SizedBox(
-          width: size * 2,
-          height: size * 2,
-          child:
-              imagePath != null
-                  ? Image.file(
-                    File(imagePath!),
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (_, __, ___) => Container(color: AppColors.secondary),
-                  )
-                  : Image.asset(
-                    "assets/images/logo.png", // Cambiar por una imagen por defecto
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (_, __, ___) => Container(color: AppColors.secondary),
-                  ),
+    return Hero(
+      tag: imagePath ?? 'default',
+      child: CircleAvatar(
+        radius: size,
+        backgroundColor: AppColors.background,
+        child: ClipOval(
+          child: SizedBox(
+            width: size * 2,
+            height: size * 2,
+            child:
+                imagePath != null && imagePath!.isNotEmpty
+                    ? Image.network(
+                      imagePath!,
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) => Container(color: AppColors.secondary),
+                    )
+                    : Image.asset(
+                      "assets/images/logo.png", // Cambiar por una imagen por defecto
+                      fit: BoxFit.cover,
+                      errorBuilder:
+                          (_, __, ___) => Container(color: AppColors.secondary),
+                    ),
+          ),
         ),
       ),
     );
   }
 }
 
-class NavBar extends StatelessWidget {
-  final int currentIndex;
+// Modal de confirmacion
+class ConfirmationModal extends StatelessWidget {
+  const ConfirmationModal({
+    super.key,
+    required this.title,
+    required this.content,
+    required this.confirmationMessage,
+    required this.confirmationColor,
+    required this.onConfirm,
+  });
 
-  const NavBar({super.key, required this.currentIndex});
+  final String title;
+  final String content;
+  final String confirmationMessage;
+  final Color confirmationColor;
+  final VoidCallback onConfirm;
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_month),
-          label: 'Calendario',
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: Text(
+        title,
+        style: const TextStyle(color: AppColors.textPrimary, fontSize: 25),
+      ),
+      content: Text(
+        content,
+        style: const TextStyle(fontSize: 16, color: AppColors.textTertiary),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(
+            'Cancelar',
+            style: TextStyle(color: AppColors.primary, fontSize: 16),
+          ),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          label: 'Configuración',
+        TextButton(
+          onPressed: () {
+            onConfirm();
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            confirmationMessage,
+            style: TextStyle(color: confirmationColor, fontSize: 16),
+          ),
         ),
       ],
-      currentIndex: currentIndex,
-      selectedItemColor: AppColors.primary,
-      onTap: (index) {},
+    );
+  }
+}
+
+class ConfirmationDialog extends StatelessWidget {
+  final String title;
+  final String content;
+  final String confirmationMessage;
+  final Color confirmationColor;
+  final VoidCallback onConfirm;
+  final String successMessage;
+  final Color successColor;
+
+  const ConfirmationDialog({
+    key,
+    required this.title,
+    required this.content,
+    required this.confirmationMessage,
+    required this.confirmationColor,
+    required this.onConfirm,
+    this.successMessage = 'Operación completada correctamente.',
+    this.successColor = AppColors.good,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop(); // Cierra el modal
+          },
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () {
+            onConfirm(); // Ejecuta la acción
+            Navigator.of(context).pop(); // Cierra el modal
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  successMessage,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                backgroundColor: successColor,
+                behavior: SnackBarBehavior.floating,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                margin: const EdgeInsets.all(16),
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          },
+          child: Text(
+            confirmationMessage,
+            style: TextStyle(color: confirmationColor),
+          ),
+        ),
+      ],
     );
   }
 }

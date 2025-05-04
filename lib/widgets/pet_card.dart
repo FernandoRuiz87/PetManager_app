@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/models/pet.dart';
-import 'package:pet_manager_app/widgets/common_widgets.dart';
+import 'package:pet_manager/models/pet.dart';
+import 'package:pet_manager/styles/app_colors.dart';
+import 'package:pet_manager/widgets/common_widgets.dart';
 
 class PetCard extends StatelessWidget {
   final Pet pet;

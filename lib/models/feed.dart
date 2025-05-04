@@ -1,23 +1,17 @@
-import 'package:uuid/uuid.dart';
 import 'package:intl/intl.dart';
 
-/// Modelo para gestionar la configuración de alimentación de una mascota
 class Feeding {
   final String id;
-  final String petId; // ID de la mascota asociada
   final double totalFoodKg; // Peso total del alimento en kg
   final double dailyConsumptionGrams; // Consumo diario en gramos
   final DateTime purchaseDate; // Fecha de compra del alimento
-  final String? notes; // Notas adicionales
 
   Feeding({
-    String? id,
-    required this.petId,
+    required this.id,
     required this.totalFoodKg,
     required this.dailyConsumptionGrams,
     required this.purchaseDate,
-    this.notes,
-  }) : id = id ?? const Uuid().v4();
+  });
 
   // --- MÉTODOS DE CÁLCULO ---
 
@@ -53,11 +47,9 @@ class Feeding {
   factory Feeding.fromJson(Map<String, dynamic> json) {
     return Feeding(
       id: json['id'],
-      petId: json['petId'],
       totalFoodKg: json['totalFoodKg'].toDouble(),
       dailyConsumptionGrams: json['dailyConsumptionGrams'].toDouble(),
       purchaseDate: DateTime.parse(json['purchaseDate']),
-      notes: json['notes'],
     );
   }
 
@@ -65,41 +57,9 @@ class Feeding {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'petId': petId,
       'totalFoodKg': totalFoodKg,
       'dailyConsumptionGrams': dailyConsumptionGrams,
       'purchaseDate': purchaseDate.toIso8601String(),
-      'notes': notes,
     };
-  }
-
-  /// Para debug
-  @override
-  String toString() {
-    return 'Feeding(id: $id, petId: $petId, totalFoodKg: $totalFoodKg, '
-        'dailyConsumptionGrams: $dailyConsumptionGrams, '
-        'purchaseDate: $purchaseDate, notes: $notes)';
-  }
-
-  // --- UTILIDADES ---
-
-  /// Copia el objeto con nuevos valores
-  Feeding copyWith({
-    String? id,
-    String? petId,
-    double? totalFoodKg,
-    double? dailyConsumptionGrams,
-    DateTime? purchaseDate,
-    String? notes,
-  }) {
-    return Feeding(
-      id: id ?? this.id,
-      petId: petId ?? this.petId,
-      totalFoodKg: totalFoodKg ?? this.totalFoodKg,
-      dailyConsumptionGrams:
-          dailyConsumptionGrams ?? this.dailyConsumptionGrams,
-      purchaseDate: purchaseDate ?? this.purchaseDate,
-      notes: notes ?? this.notes,
-    );
   }
 }

@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/models/pet.dart';
-import 'package:pet_manager_app/models/shower.dart';
-import 'package:pet_manager_app/pages/feeding_settings_page.dart';
-import 'package:pet_manager_app/pages/pets/edit_pet_info.dart';
-import 'package:pet_manager_app/pages/vaccines/new_vaccine_page.dart';
-import 'package:pet_manager_app/providers/pet_provider.dart';
-import 'package:pet_manager_app/widgets/common_widgets.dart';
-import 'package:pet_manager_app/widgets/custom_buttons.dart';
-import 'package:pet_manager_app/widgets/feed_card.dart';
-import 'package:pet_manager_app/widgets/shower_card.dart';
-import 'package:pet_manager_app/widgets/vaccine_card.dart';
-import 'package:provider/provider.dart';
+import 'package:pet_manager/models/pet.dart';
+import 'package:pet_manager/pages/pets/edit_pet_page.dart';
+import 'package:pet_manager/styles/app_colors.dart';
+import 'package:pet_manager/widgets/buttons.dart';
+import 'package:pet_manager/widgets/common_widgets.dart';
+import 'package:pet_manager/widgets/feed_card.dart';
+import 'package:pet_manager/widgets/shower_card.dart';
+import 'package:pet_manager/widgets/text_fields.dart';
+import 'package:pet_manager/widgets/vaccine_card.dart';
 
 class PetPage extends StatelessWidget {
   const PetPage({super.key});
@@ -19,28 +15,17 @@ class PetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Pet pet = ModalRoute.of(context)!.settings.arguments as Pet;
-    final petProvider = Provider.of<PetProvider>(context);
+
     final padding = MediaQuery.of(context).padding;
-
-    // Obtener la versión actualizada de la mascota del provider
-    final currentPet = petProvider.pets.firstWhere(
-      (p) => p.id == pet.id,
-      orElse: () => pet,
-    );
-
-    // Cargar datos de alimentación al iniciar
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      petProvider.loadFeeding(pet.id);
-    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(currentPet.name),
+        title: Text(pet.name),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => petProvider.loadPets(),
+            onPressed: () {},
             tooltip: 'Actualizar datos',
           ),
         ],
@@ -57,19 +42,17 @@ class PetPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Center(
-                  child: PetPicture(size: 75, imagePath: currentPet.photoUrl),
-                ),
+                Center(child: PetPicture(size: 75, imagePath: pet.photoUrl)),
                 const SizedBox(height: 20),
-                _PetNameSection(pet: currentPet),
+                _PetNameSection(pet: pet),
                 const SizedBox(height: 20),
-                _ActionButtons(pet: currentPet, petProvider: petProvider),
+                _ActionButtons(pet: pet),
                 const SizedBox(height: 20),
-                _VaccinesSection(pet: currentPet),
+                _VaccinesSection(pet: pet),
                 const SizedBox(height: 20),
-                _ShowersSection(pet: currentPet),
-                const SizedBox(height: 20),
-                _FeedSection(petId: currentPet.id),
+                _ShowersSection(pet: pet),
+                const SizedBox(height: 10),
+                _FeedSection(pet: pet),
               ],
             ),
           ),
@@ -85,8 +68,7 @@ class _VaccinesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final petProvider = Provider.of<PetProvider>(context, listen: false);
-    final vaccines = pet.vaccines ?? [];
+    final vaccines = pet.vaccines;
 
     return _ExpansionTileSection(
       title: ('Vacunas (${vaccines.length})'),
@@ -94,59 +76,12 @@ class _VaccinesSection extends StatelessWidget {
       itemCount: vaccines.length,
       emptyMessage: 'No hay vacunas registradas',
       onAddPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => NewVaccinePage(petId: pet.id),
-          ),
-        ).then((_) => petProvider.loadPets());
+        Navigator.pushNamed(context, '/newVaccine');
       },
       itemBuilder: (context, index) {
         final vaccine = vaccines[index];
-        return VaccineCard(
-          vaccine: vaccine,
-          onEdit: () {},
-          onDelete:
-              () => _showDeleteVaccineDialog(
-                context,
-                petProvider,
-                pet.id,
-                vaccine.id,
-              ),
-        );
+        return VaccineCard(vaccine: vaccine);
       },
-    );
-  }
-
-  void _showDeleteVaccineDialog(
-    BuildContext context,
-    PetProvider provider,
-    String petId,
-    String vaccineId,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Eliminar vacuna'),
-            content: const Text('¿Estás seguro de eliminar esta vacuna?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await provider.deleteVaccine(petId, vaccineId);
-                  if (context.mounted) Navigator.pop(context);
-                },
-                child: const Text(
-                  'Eliminar',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
-          ),
     );
   }
 }
@@ -157,171 +92,102 @@ class _ShowersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final petProvider = Provider.of<PetProvider>(context, listen: false);
-    final showers = pet.showers ?? [];
+    final showers = pet.showers;
+    final dateController = TextEditingController();
+
+    Future<void> showAddShowerModal() async {
+      await showDialog(
+        context: context,
+        builder:
+            (context) => AddShowerModal(
+              dateController: dateController,
+              onCancel: () => Navigator.pop(context),
+              onSubmit: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Baño registrado correctamente para ${pet.name}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: AppColors.good,
+                    behavior: SnackBarBehavior.floating,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    ),
+                    margin: const EdgeInsets.all(16),
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+                Navigator.pop(context);
+              },
+            ),
+      );
+    }
 
     return _ExpansionTileSection(
       title: 'Baños (${showers.length})',
       icon: Icons.shower_outlined,
       itemCount: showers.length,
       emptyMessage: 'No hay registros de baños',
-      onAddPressed: () => _showAddShowerDialog(context, petProvider, pet.id),
+      onAddPressed: showAddShowerModal,
       itemBuilder: (context, index) {
         final shower = showers[index];
-        return ShowerCard(
-          shower: shower,
-          onDelete:
-              () => _showDeleteShowerDialog(
-                context,
-                petProvider,
-                pet.id,
-                shower.id,
-              ),
-        );
+        return ShowerCard(shower: shower, onDelete: () {});
       },
-    );
-  }
-
-  void _showAddShowerDialog(
-    BuildContext context,
-    PetProvider provider,
-    String petId,
-  ) {
-    final dateController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Agregar baño'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: dateController,
-                decoration: const InputDecoration(
-                  labelText: 'Fecha (YYYY-MM-DD)',
-                  hintText: 'Ej: 2023-11-15',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (dateController.text.isNotEmpty) {
-                  await provider.addShower(
-                    petId,
-                    Shower(date: dateController.text),
-                  );
-                  if (context.mounted) Navigator.pop(context);
-                }
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteShowerDialog(
-    BuildContext context,
-    PetProvider provider,
-    String petId,
-    String showerId,
-  ) {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Eliminar baño'),
-            content: const Text(
-              '¿Estás seguro de eliminar este registro de baño?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  await provider.deleteShower(petId, showerId);
-                  if (context.mounted) Navigator.pop(context);
-                },
-                child: const Text(
-                  'Eliminar',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
-          ),
     );
   }
 }
 
 class _FeedSection extends StatelessWidget {
-  const _FeedSection({required this.petId});
-
-  final String petId;
+  final Pet pet;
+  const _FeedSection({required this.pet});
 
   @override
   Widget build(BuildContext context) {
-    final petProvider = Provider.of<PetProvider>(context);
-    final feeding = petProvider.currentFeeding;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 17.0),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.food_bank_outlined,
-                color: AppColors.textPrimary,
-                size: 30,
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Text(
-                  'Alimentación',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+    return Card(
+      color: AppColors.background,
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.food_bank_outlined,
+                  color: AppColors.textPrimary,
+                  size: 30,
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Alimentación',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
-              CustomTextButton(
-                text: 'Configurar',
-                fontSize: 16,
-                onPressed:
-                    () => Navigator.push(
+                CustomTextButton(
+                  text: 'Configurar',
+                  fontSize: 16,
+                  onPressed: () {
+                    Navigator.pushNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => FeedingSettingsPage(petId: petId),
-                      ),
-                    ),
-                textColor: AppColors.primary,
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (feeding != null)
-            FeedCard(feeding: feeding)
-          else
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              child: Text(
-                'No hay configuración de alimentación',
-                style: TextStyle(color: AppColors.textTertiary, fontSize: 16),
-              ),
+                      '/feedConfiguration',
+                      arguments: pet,
+                    );
+                  },
+                  textColor: AppColors.primary,
+                ),
+              ],
             ),
-        ],
+            const SizedBox(height: 10),
+            FeedCard(feeding: pet.feedings),
+          ],
+        ),
       ),
     );
   }
@@ -353,8 +219,33 @@ class _PetNameSection extends StatelessWidget {
 
 class _ActionButtons extends StatelessWidget {
   final Pet pet;
-  final PetProvider petProvider;
-  const _ActionButtons({required this.pet, required this.petProvider});
+  const _ActionButtons({required this.pet});
+
+  // Metodo para mostrar un dialogo de confirmacion
+  Future<void> showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    required String content,
+    required String confirmationMessage,
+    required Color confirmationColor,
+    required VoidCallback onConfirm,
+    String successMessage = 'Operación completada correctamente.',
+    Color successColor = AppColors.good,
+  }) async {
+    await showDialog(
+      context: context,
+      builder:
+          (context) => ConfirmationDialog(
+            title: title,
+            content: content,
+            confirmationMessage: confirmationMessage,
+            confirmationColor: confirmationColor,
+            onConfirm: onConfirm,
+            successMessage: successMessage,
+            successColor: successColor,
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -371,10 +262,8 @@ class _ActionButtons extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => EditPetPage(pet: pet),
-                  ),
-                ).then((_) => petProvider.loadPets());
+                  MaterialPageRoute(builder: (_) => EditPetPage(pet: pet)),
+                );
               },
             ),
           ),
@@ -385,42 +274,37 @@ class _ActionButtons extends StatelessWidget {
               buttonColor: AppColors.alert,
               foregroundColor: AppColors.textSecondary,
               height: 35,
-              onPressed: () => _showDeleteConfirmationDialog(context),
+              onPressed: () async {
+                await showConfirmationDialog(
+                  context: context,
+                  title: 'Eliminar mascota',
+                  content: '¿Estás seguro de que desea eliminar a ${pet.name}?',
+                  confirmationMessage: 'Guardar',
+                  confirmationColor: AppColors.alert,
+                  onConfirm: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          'Mascota eliminada correctamente.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        backgroundColor: AppColors.good,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        margin: const EdgeInsets.all(16),
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  },
+                );
+              },
             ),
           ),
         ],
       ),
-    );
-  }
-
-  void _showDeleteConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Confirmar eliminación'),
-          content: Text('¿Estás seguro de eliminar a ${pet.name}?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await petProvider.deletePet(pet.id);
-                if (context.mounted) {
-                  Navigator.pop(context); // Cierra el diálogo
-                  Navigator.pop(context); // Regresa a la pantalla anterior
-                }
-              },
-              child: const Text(
-                'Eliminar',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 }
@@ -510,6 +394,76 @@ class _ExpansionTileTitle extends StatelessWidget {
           tooltip: 'Agregar',
         ),
       ],
+    );
+  }
+}
+
+class AddShowerModal extends StatelessWidget {
+  final TextEditingController dateController;
+  final VoidCallback onCancel;
+  final VoidCallback onSubmit;
+
+  const AddShowerModal({
+    super.key,
+    required this.dateController,
+    required this.onCancel,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      insetPadding: const EdgeInsets.all(20),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Nueva ducha',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              CustomTextField(
+                fieldLabel: 'Ingresa la fecha de la ducha',
+                defaultText: 'Fecha (YYYY-MM-DD)',
+                isNumberField: false,
+                controller: dateController,
+                isRequired: true,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: CustomButton(
+                      text: 'Cancelar',
+                      buttonColor: AppColors.alert,
+                      foregroundColor: AppColors.textSecondary,
+                      onPressed: onCancel,
+                      height: 50,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: CustomButton(
+                      text: 'Agregar',
+                      buttonColor: AppColors.primary,
+                      foregroundColor: AppColors.textSecondary,
+                      onPressed: onSubmit,
+                      height: 50,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

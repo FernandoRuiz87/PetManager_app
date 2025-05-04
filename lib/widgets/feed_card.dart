@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pet_manager_app/colors/app_colors.dart';
-import 'package:pet_manager_app/models/feeding.dart';
+import 'package:pet_manager/models/feed.dart';
+import 'package:pet_manager/styles/app_colors.dart';
 
 class FeedCard extends StatelessWidget {
   final Feeding feeding;
@@ -25,10 +25,6 @@ class FeedCard extends StatelessWidget {
               _ProgressBar(progressValue: feeding.progressValue),
               const SizedBox(height: 10),
               _RemainingDays(remainingDays: feeding.remainingDays),
-              if (feeding.notes != null && feeding.notes!.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                _NotesSection(notes: feeding.notes!),
-              ],
             ],
           ),
         ),
@@ -136,33 +132,6 @@ class _RemainingDays extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _NotesSection extends StatelessWidget {
-  final String notes;
-
-  const _NotesSection({required this.notes});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Divider(),
-        const SizedBox(height: 8),
-        Text(
-          'Notas:',
-          style: TextStyle(
-            fontSize: 14,
-            color: AppColors.textTertiary,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(notes, style: const TextStyle(fontSize: 14)),
       ],
     );
   }
